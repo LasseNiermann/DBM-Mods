@@ -289,7 +289,7 @@ module.exports = {
         throw new Error('you did not set a file path, please go back and check your work.');
       }
     } catch (err) {
-      return console.error(`ERROR ${err.stack || err}`);
+      return console.error(`ERROR ${err.stack ?? err}`);
     }
     this.callNextAction(cache);
   },

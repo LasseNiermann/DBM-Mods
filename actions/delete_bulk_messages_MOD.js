@@ -15,7 +15,7 @@ module.exports = {
       'Server Variable',
       'Global Variable',
     ];
-    return `Delete ${data.count} messages from ${channels[parseInt(data.channel, 10)] || 'Nothing'}`;
+    return `Delete ${data.count} messages from ${channels[parseInt(data.channel, 10)] ?? 'Nothing'}`;
   },
 
   fields: [
@@ -243,81 +243,74 @@ module.exports = {
 
     options.limit = 100;
     const limit = Math.min(parseInt(this.evalMessage(data.count, cache), 10), 100);
-    if (this.dest(source, 'messages', 'fetch')) {
-      try {
-        const Con0 = this.evalMessage(data.Con0, cache);
-        const Con1 = this.evalMessage(data.Con1, cache);
-        const Con2 = this.evalMessage(data.Con2, cache);
-        const Con3 = this.evalMessage(data.Con3, cache);
-        const Con4 = this.evalMessage(data.Con4, cache);
-        const Con5 = this.evalMessage(data.Con5, cache);
-        const { Collection } = this.getDBM().DiscordJS;
-        let messagesFound = new Collection();
-        let lastId;
-        let times = 0;
-        while (times === 0 || (messagesFound && messagesFound.size < limit)) {
-          times++;
-          if (times === 10) throw Error('Looping for 10 times. Stop searching messages.');
-          let messages;
-          if (lastId && (messagesFound.length || messagesFound.size) < limit) {
-            options.before = lastId;
-            messages = await source.messages.fetch(options);
-          } else {
-            messages = await source.messages.fetch(options);
-            lastId = messages.lastKey();
-          }
-          let filtered = messages;
-          if (Con0) filtered = filtered.filter((e) => e.author.id !== Con0.replace(/\D/g, ''));
-          if (Con1) filtered = (filtered || messages).filter((e) => e.author.id === Con1.replace(/\D/g, ''));
-          if (Con2 !== '0') {
-            filtered = (filtered || messages).filter((e) =>
-              Con2 === '1' ? e.embeds.length === 0 : e.embeds.length !== 0,
-            );
-          }
-          if (Con3) filtered = (filtered || messages).filter((e) => e.content.includes(Con3));
-          if (Con4) {
-            filtered = (filtered || messages).filter((message) => {
-              let result = false;
-              try {
-                result = Boolean(eval(Con4));
-              } catch {}
-              return result;
-            });
-          }
-          if (Con5 !== '0') {
-            filtered = (filtered || messages).filter((e) =>
-              Con5 === '1' ? e.attachments.size === 0 : e.attachments.size !== 0,
-            );
-          }
-          messagesFound = messagesFound.concat(filtered);
-        }
-        if (messagesFound.array) messagesFound = messagesFound.array();
-        if (messagesFound.length > limit) {
-          messagesFound.splice(limit);
-        }
-        const deleted = await source.bulkDelete(messagesFound);
-        const storage = parseInt(data.storage, 10);
-        if (storage !== 0 && deleted) {
-          let result = deleted.array ? deleted.array() : deleted;
-          if (deleted.length === 1) result = deleted[0];
-          const varName = this.evalMessage(data.varName2, cache);
-          this.storeValue(result, storage, varName, cache);
-        }
-        this.callNextAction(cache);
-      } catch (err) {
-        if (
-          [
-            'You can only bulk delete messages that are under 14 days old.',
-            'Looping for 10 times. Stop searching messages.',
-          ].includes(err.message)
-        ) {
-          this.executeResults(false, data, cache);
+    if (!source) return this.callNextAction(cache);
+
+    try {
+      const Con0 = this.evalMessage(data.Con0, cache);
+      const Con1 = this.evalMessage(data.Con1, cache);
+      const Con2 = this.evalMessage(data.Con2, cache);
+      const Con3 = this.evalMessage(data.Con3, cache);
+      const Con4 = this.evalMessage(data.Con4, cache);
+      const Con5 = this.evalMessage(data.Con5, cache);
+      const { Collection } = this.getDBM().DiscordJS;
+      let messagesFound = new Collection();
+      let lastId;
+      let times = 0;
+      while (times === 0 || (messagesFound && messagesFound.size < limit)) {
+        times++;
+        if (times === 10) return this.executeResults(false, data, cache);
+        let messages;
+        if (lastId && (messagesFound.length ?? messagesFound.size ?? 0) < limit) {
+          options.before = lastId;
+          messages = await source.messages.fetch(options);
         } else {
-          this.displayError(data, cache, err);
+          messages = await source.messages.fetch(options);
+          lastId = messages.lastKey();
         }
+        let filtered = messages;
+        if (Con0) filtered = filtered.filter((e) => e.author.id !== Con0.replace(/\D/g, ''));
+        if (Con1) filtered = (filtered ?? messages).filter((e) => e.author.id === Con1.replace(/\D/g, ''));
+        if (Con2 !== '0') {
+          filtered = (filtered ?? messages).filter((e) =>
+            Con2 === '1' ? e.embeds.length === 0 : e.embeds.length !== 0,
+          );
+        }
+        if (Con3) filtered = (filtered ?? messages).filter((e) => e.content.includes(Con3));
+        if (Con4) {
+          filtered = (filtered ?? messages).filter(() => {
+            try {
+              return Boolean(eval(Con4));
+            } catch {
+              return false;
+            }
+          });
+        }
+        if (Con5 !== '0') {
+          filtered = (filtered ?? messages).filter((e) =>
+            Con5 === '1' ? e.attachments.size === 0 : e.attachments.size !== 0,
+          );
+        }
+        messagesFound = messagesFound.concat(filtered);
       }
-    } else {
+      if (messagesFound.array) messagesFound = messagesFound.array();
+      if (messagesFound.length > limit) {
+        messagesFound.splice(limit);
+      }
+      const deleted = await source.bulkDelete(messagesFound);
+      const storage = parseInt(data.storage, 10);
+      if (storage !== 0 && deleted) {
+        let result = Array.isArray(deleted) ? deleted : deleted.array();
+        if (deleted.length === 1) result = deleted[0];
+        const varName = this.evalMessage(data.varName2, cache);
+        this.storeValue(result, storage, varName, cache);
+      }
       this.callNextAction(cache);
+    } catch (err) {
+      if (err.message === 'You can only bulk delete messages that are under 14 days old.') {
+        this.executeResults(false, data, cache);
+      } else {
+        this.displayError(data, cache, err);
+      }
     }
   },
 

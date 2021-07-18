@@ -187,7 +187,7 @@ module.exports = {
             statusCode: 0,
             success: false,
           });
-          if (debugMode) console.error(error.stack || error);
+          if (debugMode) console.error(error.stack ?? error);
 
           return this.storeValue(errorJson, storage, varName, cache);
         }
@@ -243,7 +243,7 @@ module.exports = {
 
           Actions.callNextAction(cache);
         } catch (err) {
-          if (debugMode) console.error(err.stack || err);
+          if (debugMode) console.error(err.stack ?? err);
         }
       }
     } else if (debugMode) console.error(`URL [${url}] Is Not Valid`);

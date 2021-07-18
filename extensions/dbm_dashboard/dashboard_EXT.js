@@ -512,7 +512,7 @@ module.exports = {
       console.log('-------------------------------------------------------------------------------------------------');
     };
 
-    const dashboardOnReady = DBM.Bot.onReady || {};
+    const dashboardOnReady = DBM.Bot.onReady ?? {};
     DBM.Bot.onReady = async function _dashboardOnReady() {
       Dashboard.scopes = ['identify', 'guilds'];
 

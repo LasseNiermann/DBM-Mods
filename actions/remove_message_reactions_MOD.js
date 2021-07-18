@@ -40,15 +40,12 @@ module.exports = {
         message.map((m) => m.reactions),
         'removeAll',
         [],
-      ).then(() => {
-        this.callNextAction(cache);
-      });
-    } else if (this.dest(message, 'reactions', 'removeAll')) {
-      message.reactions
+      ).then(() => this.callNextAction(cache));
+    } else {
+      // eslint-disable-next-line no-unused-expressions
+      message?.reactions
         .removeAll()
-        .then(() => {
-          this.callNextAction(cache);
-        })
+        .then(() => this.callNextAction(cache))
         .catch(this.displayError.bind(this, data, cache));
     }
     this.callNextAction(cache);

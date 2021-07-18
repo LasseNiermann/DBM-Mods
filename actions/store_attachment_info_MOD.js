@@ -19,7 +19,7 @@ module.exports = {
     if (parseInt(data.storage2, 10) !== varType) return;
     return [
       data.varName2,
-      ['URL', 'File Name', 'Number', null, 'File Size'][parseInt(data.info, 10)] || 'Message Attachment (Unknown) Info',
+      ['URL', 'File Name', 'Number', null, 'File Size'][parseInt(data.info, 10)] ?? 'Message Attachment (Unknown) Info',
     ];
   },
 

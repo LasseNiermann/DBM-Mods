@@ -124,11 +124,9 @@ module.exports = {
 
     let result;
     if (Array.isArray(member)) {
-      result = member.every(
-        (user) => this.dest(reaction, 'users', 'cache') && user && reaction.users.cache.has(user.id),
-      );
-    } else if (this.dest(reaction, 'users', 'cache') && member) {
-      result = reaction.users.cache.has(member.id);
+      result = member.every((user) => reaction?.users.cache.has(user.id));
+    } else {
+      result = Boolean(reaction?.users.cache.has(member.id));
     }
     this.executeResults(result, data, cache);
   },

@@ -222,8 +222,8 @@ module.exports = {
               const header = lines[i].split(':');
 
               if (lines[i].includes(':') && header.length > 0) {
-                const key = header[0] || 'Unknown';
-                const value = header[1] || 'Unknown';
+                const key = header[0] ?? 'Unknown';
+                const value = header[1] ?? 'Unknown';
                 setHeaders[key] = value;
 
                 if (debugMode) console.log(`Applied Header: ${lines[i]}`);
@@ -244,11 +244,11 @@ module.exports = {
             const json = await response.json();
             storeData('', response, json);
           } catch (err) {
-            if (debugMode) console.error(err.stack || err);
+            if (debugMode) console.error(err.stack ?? err);
           }
         }
       } catch (err) {
-        if (debugMode) console.error(err.stack || err);
+        if (debugMode) console.error(err.stack ?? err);
       }
     } else if (debugMode) console.error(`URL [${url}] Is Not Valid`);
   },

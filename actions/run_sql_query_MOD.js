@@ -451,7 +451,7 @@ module.exports = {
             sequelize
               .query(query, {
                 type:
-                  Object.keys(Sequelize.QueryTypes).find((type) => query.toUpperCase().startsWith(type)) ||
+                  Object.keys(Sequelize.QueryTypes).find((type) => query.toUpperCase().startsWith(type)) ??
                   Sequelize.QueryTypes.RAW,
               })
               .then((results) => {
@@ -494,12 +494,12 @@ module.exports = {
                   );
                   console.log(`Example \${${output}("${varName}")[key].path} or use the json path box in the mod UI.`);
                 }
-                const out = jsonOut || results;
+                const out = jsonOut ?? results;
                 this.storeValue(stringifyOutput ? JSON.stringify(out) : out, storage, varName, cache);
                 this.callNextAction(cache);
               })
               .catch((err) => {
-                if (err && err.original) {
+                if (err?.original) {
                   this.storeValue({ message: err.original, error: err.original }, storage, varName, cache);
                   console.error(err.original);
                   this.callNextAction(cache);

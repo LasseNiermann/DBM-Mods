@@ -8,7 +8,7 @@ module.exports = {
   ],
 
   mod(DBM) {
-    DBM.Events = DBM.Events || {};
+    DBM.Events = DBM.Events ?? {};
     const { Actions, Bot } = DBM;
     DBM.Events.memberLeaveVoiceChannel = function memberLeaveVoiceChannel(oldVoiceState, newVoiceState) {
       if (!Bot.$evts['Member Leave Voice Channel']) return;
